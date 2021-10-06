@@ -59,7 +59,6 @@ const proveedorSchema = moongose.Schema({
         }
     }],
     versionKey: false,
-    timestamps: true
 
 });
 

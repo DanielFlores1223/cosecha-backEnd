@@ -52,7 +52,6 @@ const clienteSchema = moongose.Schema({
         }
     }],
     versionKey: false,
-    timestamps: true
 });
 
 module.exports = moongose.model('cliente', clienteSchema)

@@ -1,6 +1,6 @@
-const moongose = require('mongoose');
+const mongoose = require('mongoose');
 
-const AdministradorSchema = new moongose.Schema({
+const AdministradorSchema = new mongoose.Schema({
     nombre: {
         type: String,
         required: true
@@ -18,7 +18,6 @@ const AdministradorSchema = new moongose.Schema({
         required: true
     },
     versionKey: false,
-    timestamps: true
 });
 
 module.exports = mongoose.model('administrador', AdministradorSchema);
