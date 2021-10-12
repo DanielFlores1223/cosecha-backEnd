@@ -41,25 +41,41 @@ const proveedorSchema = moongose.Schema({
     img: {
         type: String,
     },
+    calificacion: [{
+        idCliente: {
+            type: String
+        },
+        idPedido: {
+            type: String
+        },
+        estrellas: {
+            type: Number
+        }
+    }],
     productos: [{
         nombreProducto: {
-            type: String,
-            required: true
+            type: String
         },
         precio: {
-            type: Number,
-            required: true
+            type: Number
+        },
+        tipo: {
+            type: String
         },
         descuento: {
             type: Number
         },
         stock: {
-            type: Number,
-            required: true
+            type: Number
+        },
+        img: {
+            type: String
         }
     }],
     versionKey: false,
 
 });
 
-module.exports = mongoose.model('proveedor', proveedorSchema);
+
+
+module.exports = moongose.model('proveedor', proveedorSchema);

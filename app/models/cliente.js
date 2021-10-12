@@ -29,13 +29,11 @@ const clienteSchema = moongose.Schema({
         type: Boolean
     },
     pedidos: [{
-        idProductonombre: {
+        idProducto: {
             type: String,
-            required: true
         },
-        idProveedornombre: {
+        idProveedor: {
             type: String,
-            required: true
         },
         cantidad: {
             type: Number
@@ -49,6 +47,10 @@ const clienteSchema = moongose.Schema({
         estatus: {
             type: String,
             default: 'Pendiente'
+        },
+        fechaRegistro: {
+            type: Date,
+            default: Date.now
         }
     }],
     versionKey: false,
