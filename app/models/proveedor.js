@@ -41,17 +41,6 @@ const proveedorSchema = moongose.Schema({
     img: {
         type: String,
     },
-    calificacion: [{
-        idCliente: {
-            type: String
-        },
-        idPedido: {
-            type: String
-        },
-        estrellas: {
-            type: Number
-        }
-    }],
     productos: [{
         nombreProducto: {
             type: String

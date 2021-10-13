@@ -8,6 +8,8 @@ const port = 3001;
 //archivos de rutas
 const administradorRuta = require('./app/routes/administrador');
 const proveedorRuta = require('./app/routes/proveedor');
+const clienteRuta = require('./app/routes/cliente');
+const loginRuta = require('./app/routes/login');
 
 app.get('/', (req, res) => {
     res.send({
@@ -37,8 +39,10 @@ app.use(
 //rutas en uso
 app.use(administradorRuta);
 app.use(proveedorRuta);
-
+app.use(clienteRuta);
+app.use(loginRuta);
 
 //rutas que permiten acceder a las carpetas de imagenes
 app.use('/img-administrador', express.static('img-administrador'));
 app.use('/img-proveedor', express.static('img-proveedor'));
+app.use('/img-cliente', express.static('img-cliente'));

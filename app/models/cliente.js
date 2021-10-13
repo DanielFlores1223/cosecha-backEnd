@@ -49,8 +49,14 @@ const clienteSchema = moongose.Schema({
             default: 'Pendiente'
         },
         fechaRegistro: {
-            type: Date,
-            default: Date.now
+            type: String
+        },
+        fechaUpdate: {
+            type: String,
+            default: ''
+        },
+        estrellas: {
+            type: Number
         }
     }],
     versionKey: false,

@@ -1,5 +1,5 @@
 const moongose = require('mongoose');
-const model = require('../models/proveedor');
+const model = require('../models/cliente');
 const generalFunctions = require('./generalFunctions');
 const multer = require('multer');
 const fs = require('fs-extra');
@@ -8,10 +8,10 @@ let pathImg = '';
 
 const storage = multer.diskStorage({
     destination: function(req, file, cb) {
-        cb(null, 'img-proveedor')
+        cb(null, 'img-cliente')
     },
     filename: function(req, file, cb) {
-        pathImg = `/img-proveedor/${Date.now()}-${file.originalname}`;
+        pathImg = `/img-cliente/${Date.now()}-${file.originalname}`;
         cb(null, Date.now() + '-' + file.originalname)
     }
 });
@@ -56,11 +56,11 @@ exports.insert = async(req, res) => {
 exports.deleteSingle = async(req, res) => {
     const { id } = req.params;
 
-    const proveedor = await model.findById({ _id: id });
+    const cliente = await model.findById({ _id: id });
 
     //Eliminamos la imagen
-    if (proveedor)
-        await fs.unlink(`./${proveedor.img}`);
+    if (cliente)
+        await fs.unlink(`./${cliente.img}`);
 
     await model.deleteOne({ _id: parseId(id) },
         (err, data) => {
@@ -102,10 +102,10 @@ exports.updateSingleImg = async(req, res) => {
         return;
     }
 
-    const admin = await model.findById({ _id: id });
+    const cliente = await model.findById({ _id: id });
 
     if (pathImg !== '') {
-        await fs.unlink(`./${admin.img}`);
+        await fs.unlink(`./${cliente.img}`);
         body.img = pathImg;
         pathImg = '';
     }
@@ -119,62 +119,70 @@ exports.updateSingleImg = async(req, res) => {
     res.send(modelMod);
 }
 
-// ** Productos array **
-exports.addProducto = async(req, res) => {
+// ** Pedidos **
+exports.addPedido = async(req, res) => {
     const { id } = req.params;
     const data = req.body;
-    data.img = pathImg;
+    data.total = Number(data.cantidad * data.precioProducto);
 
-    const proveedor = await model.findById({ _id: id });
+    //Obtener fecha
+    const diaHoy = new Date();
+    const fecha = diaHoy.getDate() + '/' + (diaHoy.getMonth() + 1) + '/' + diaHoy.getFullYear();
 
-    proveedor.productos = proveedor.productos.concat(data);
+    data.fechaRegistro = fecha;
 
-    await proveedor.save();
+    const cliente = await model.findById({ _id: id });
 
-    pathImg = '';
-    res.status(200).send(proveedor);
+    cliente.pedidos = cliente.pedidos.concat(data);
+
+    await cliente.save();
+
+    res.status(200).send(cliente);
 }
 
-async function deleteImgProducto(idProv, idProd) {
+exports.deletePedido = async(req, res) => {
+    const { idCliente, idPedido } = req.params;
 
-    let proveedor = await model.findById(idProv);
+    let cliente = await model.findById(idCliente);
 
-    let productoObject = proveedor.productos.find(p => p._id == idProd);
+    cliente.pedidos = cliente.pedidos.pull({ _id: idPedido });
 
-    if (proveedor) {
-        await fs.unlink(`./${productoObject.img}`);
-        return true;
-    } else
-        return false;
+    await cliente.save();
+
+    res.send(cliente).status(201);
 }
 
-exports.deleteProducto = async(req, res) => {
-    const { idProv, idProd } = req.params;
+async function queryUpdate(idCliente, idPedido, body) {
+    const { cantidad, estatus, estrellas } = body;
 
-    const imgDeleted = await deleteImgProducto(idProv, idProd);
+    let cliente = await model.findById(idCliente);
 
-    if (!imgDeleted) {
-        res.send({ error: 'ERROR!!!!' });
-        return;
+    clienteObject = cliente.pedidos.find(p => p._id == idPedido);
+
+
+    if (clienteObject.cantidad != cantidad) {
+        const total = Number(cantidad * clienteObject.precioProducto);
+
+        await model.findOneAndUpdate({ '$and': [{ '_id': parseId(idCliente) }, { 'pedidos._id': parseId(idPedido) }] }, {
+            $set: {
+                'pedidos.$.total': total,
+            }
+        }, {
+            new: true
+        });
+
     }
 
-    proveedor.productos = proveedor.productos.pull({ _id: idProd });
+    const diaHoy = new Date();
+    const fecha = diaHoy.getDate() + '/' + (diaHoy.getMonth() + 1) + '/' + diaHoy.getFullYear();
 
-    await proveedor.save();
 
-    res.send(proveedor).status(201);
-}
-
-async function queryUpdate(idProv, idProd, body) {
-    const { nombreProducto, precio, tipo, descuento, stock } = body;
-
-    const modelMod = await model.findOneAndUpdate({ '$and': [{ '_id': parseId(idProv) }, { 'productos._id': parseId(idProd) }] }, {
+    const modelMod = await model.findOneAndUpdate({ '$and': [{ '_id': parseId(idCliente) }, { 'pedidos._id': parseId(idPedido) }] }, {
         $set: {
-            'productos.$.nombreProducto': nombreProducto,
-            'productos.$.precio': precio,
-            'productos.$.tipo': tipo,
-            'productos.$.descuento': descuento,
-            'productos.$.stock': stock,
+            'pedidos.$.cantidad': cantidad,
+            'pedidos.$.estatus': estatus,
+            'pedidos.$.fechaUpdate': fecha,
+            'pedidos.$.estrellas': estrellas
         }
     }, {
         new: true
@@ -184,33 +192,8 @@ async function queryUpdate(idProv, idProd, body) {
 }
 
 exports.updateProducto = async(req, res) => {
-    const { idProv, idProd } = req.params;
-    const resQuery = await queryUpdate(idProv, idProd, req.body);
-    res.send(resQuery);
-
-}
-
-exports.updateProductoImg = async(req, res) => {
-    const { idProv, idProd } = req.params;
-
-    const imgDeleted = await deleteImgProducto(idProv, idProd);
-
-    if (!imgDeleted) {
-        res.send({ error: 'ERROR!!!!' });
-        return;
-    }
-
-    await model.findOneAndUpdate({ '$and': [{ '_id': parseId(idProv) }, { 'productos._id': parseId(idProd) }] }, {
-        $set: {
-            'productos.$.img': pathImg
-        }
-    }, {
-        new: true
-    });
-
-    pathImg = '';
-    const resQuery = await queryUpdate(idProv, idProd, req.body);
-
+    const { idCliente, idPedido } = req.params;
+    const resQuery = await queryUpdate(idCliente, idPedido, req.body);
     res.send(resQuery);
 
 }

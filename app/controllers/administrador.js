@@ -1,5 +1,6 @@
 const moongose = require('mongoose');
 const model = require('../models/administrador');
+const generalFunctions = require('./generalFunctions');
 const multer = require('multer');
 const fs = require('fs-extra');
 
@@ -45,6 +46,14 @@ exports.getSingleLogin = async(req, res) => {
 
 exports.insert = async(req, res) => {
     const data = req.body;
+
+    const emailExistente = await generalFunctions.emailExistente(data);
+
+    if (!emailExistente) {
+        res.send({ error: 'email existente' });
+        return;
+    }
+
     data.img = pathImg;
 
     await model.create(data, (err, data) => {
@@ -81,6 +90,13 @@ exports.updateSingle = async(req, res) => {
     const { id } = req.params;
     const body = req.body;
 
+    const emailExistente = await generalFunctions.emailExistente(body);
+
+    if (!emailExistente) {
+        res.send({ error: 'email existente' });
+        return;
+    }
+
     const modelMod = await model.findOneAndUpdate({ _id: parseId(id) },
         body, {
             new: true
@@ -93,6 +109,13 @@ exports.updateSingle = async(req, res) => {
 exports.updateSingleImg = async(req, res) => {
     const { id } = req.params;
     const body = req.body;
+
+    const emailExistente = await generalFunctions.emailExistente(body);
+
+    if (!emailExistente) {
+        res.send({ error: 'email existente' });
+        return;
+    }
 
     const admin = await model.findById({ _id: id });
 
