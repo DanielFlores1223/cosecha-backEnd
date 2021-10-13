@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const initDB = require('./config/db');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const port = 3001;
 
@@ -10,6 +11,14 @@ const administradorRuta = require('./app/routes/administrador');
 const proveedorRuta = require('./app/routes/proveedor');
 const clienteRuta = require('./app/routes/cliente');
 const loginRuta = require('./app/routes/login');
+
+app.use(cors({
+    "origin": "*",
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "preflightContinue": false,
+    "optionsSuccessStatus": 204
+}))
+
 
 app.get('/', (req, res) => {
     res.send({

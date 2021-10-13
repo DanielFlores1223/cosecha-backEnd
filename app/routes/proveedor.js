@@ -8,6 +8,7 @@ router.get(`${path}`, controller.getData);
 
 router.post(`${path}`, controller.upload, controller.insert);
 router.post(`${path}/addProducto/:id`, controller.upload, controller.addProducto);
+router.post(`${path}/searchProvProd`, controller.searchProductoProveedor);
 
 router.delete(`${path}/:id`, controller.deleteSingle);
 router.delete(`${path}/deleteProducto/:idProv/:idProd`, controller.deleteProducto);

@@ -214,3 +214,24 @@ exports.updateProductoImg = async(req, res) => {
     res.send(resQuery);
 
 }
+
+exports.searchProductoProveedor = async(req, res) => {
+
+    const { busqueda } = req.body;
+
+    let resultadoBusqueda = await model.find({ '$or': [{ nombreUsuario: { '$regex': busqueda, '$options': 'i' } }, { nombreEmpresa: { '$regex': busqueda, '$options': 'i' } }] });
+
+    if (resultadoBusqueda.length === 0) {
+        resultadoBusqueda = await model.find({ 'productos.nombreProducto': { '$regex': busqueda, '$options': 'i' } });
+
+        if (resultadoBusqueda.length === 0) {
+            res.status(201).send(resultadoBusqueda);
+        } else {
+            res.status(201).send({ request: resultadoBusqueda, type: 'producto' });
+        }
+
+    } else {
+        res.status(201).send({ request: resultadoBusqueda, type: 'proveedor' });
+
+    }
+}
