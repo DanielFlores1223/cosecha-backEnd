@@ -20,7 +20,6 @@ const proveedorSchema = moongose.Schema({
     },
     password: {
         type: String,
-        unique: true,
         required: true
     },
     estatus: {
@@ -41,6 +40,11 @@ const proveedorSchema = moongose.Schema({
     img: {
         type: String,
     },
+    estrellasTotal: {
+        type: Number,
+        default: -1
+    },
+    estrellasArray: [],
     productos: [{
         nombreProducto: {
             type: String
@@ -58,6 +62,9 @@ const proveedorSchema = moongose.Schema({
             type: Number
         },
         img: {
+            type: String
+        },
+        idProveedor: {
             type: String
         }
     }],

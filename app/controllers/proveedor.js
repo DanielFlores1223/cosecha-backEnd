@@ -71,6 +71,20 @@ exports.deleteSingle = async(req, res) => {
     ).clone().catch(function(err) { console.log(err) });
 }
 
+function updateEstrellas(body) {
+
+    if (body.estrellasTotal != undefined || body.estrellasTotal != -1) {
+        let array = []
+
+        for (let index = 0; index < body.estrellasTotal; index++) {
+            console.log(index)
+            array[index] = index;
+        }
+
+        return array;
+    }
+}
+
 exports.updateSingle = async(req, res) => {
     const { id } = req.params;
     const body = req.body;
@@ -81,6 +95,9 @@ exports.updateSingle = async(req, res) => {
         res.send({ error: 'email existente' });
         return;
     }
+
+    const arrayEstrellas = updateEstrellas(req.body);
+    body.estrellasArray = arrayEstrellas;
 
     const modelMod = await model.findOneAndUpdate({ _id: parseId(id) },
         body, {
@@ -109,6 +126,10 @@ exports.updateSingleImg = async(req, res) => {
         body.img = pathImg;
         pathImg = '';
     }
+
+
+    const arrayEstrellas = updateEstrellas(req.body);
+    body.estrellasArray = arrayEstrellas;
 
     const modelMod = await model.findOneAndUpdate({ _id: parseId(id) },
         body, {
@@ -216,22 +237,45 @@ exports.updateProductoImg = async(req, res) => {
 }
 
 exports.searchProductoProveedor = async(req, res) => {
-
     const { busqueda } = req.body;
+    let arrayProductos = [];
 
-    let resultadoBusqueda = await model.find({ '$or': [{ nombreUsuario: { '$regex': busqueda, '$options': 'i' } }, { nombreEmpresa: { '$regex': busqueda, '$options': 'i' } }] });
+    /*if (busqueda == '') {
+        const todo = await model.find({});
 
-    if (resultadoBusqueda.length === 0) {
-        resultadoBusqueda = await model.find({ 'productos.nombreProducto': { '$regex': busqueda, '$options': 'i' } });
+        res.status(201).send({ proveedores: todo, productos: arrayProductos, todo: true });
+        return;
+    }*/
 
-        if (resultadoBusqueda.length === 0) {
-            res.status(201).send(resultadoBusqueda);
-        } else {
-            res.status(201).send({ request: resultadoBusqueda, type: 'producto' });
-        }
+    if (busqueda == '') {
+        res.status(201).send({ proveedor: [], productos: [] });
+        return;
+    }
 
-    } else {
-        res.status(201).send({ request: resultadoBusqueda, type: 'proveedor' });
+    const resultadoProveedores = await model.find({ '$or': [{ nombreUsuario: { '$regex': busqueda, '$options': 'i' } }, { nombreEmpresa: { '$regex': busqueda, '$options': 'i' } }] });
+
+    const resultadoProductos = await model.find({ 'productos.nombreProducto': { '$regex': busqueda, '$options': 'i' } });
+
+    if (resultadoProductos.length > 0) {
+
+        resultadoProductos.filter(p => p.productos.nombreProducto == busqueda);
+
+        resultadoProductos.forEach(proveedor => {
+
+            //Devolvemos solo los productos que corresponden al valor de la variable busqueda
+            proveedor.productos.forEach(producto => {
+
+                const nombreProducto = String(producto.nombreProducto).toLowerCase();
+                const busquedaSet = String(busqueda).toLowerCase();
+
+                if (nombreProducto.includes(busquedaSet)) {
+                    producto.idProveedor = proveedor._id;
+                    arrayProductos = [...arrayProductos, producto]
+                }
+            });
+        });
 
     }
+
+    res.status(201).send({ proveedores: resultadoProveedores, productos: arrayProductos });
 }
