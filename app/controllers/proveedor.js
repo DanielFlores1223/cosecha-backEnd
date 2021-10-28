@@ -31,6 +31,14 @@ exports.getData = async(req, res) => {
     }).clone().catch(function(err) { console.log(err) });
 }
 
+exports.getDataSingle = async(req, res) => {
+    const { _id } = req.params;
+
+    const proveedor = await model.findById({ _id });
+
+    res.send(proveedor).status(201);
+}
+
 exports.insert = async(req, res) => {
     const data = req.body;
 
@@ -240,13 +248,6 @@ exports.searchProductoProveedor = async(req, res) => {
     const { busqueda } = req.body;
     let arrayProductos = [];
 
-    /*if (busqueda == '') {
-        const todo = await model.find({});
-
-        res.status(201).send({ proveedores: todo, productos: arrayProductos, todo: true });
-        return;
-    }*/
-
     if (busqueda == '') {
         res.status(201).send({ proveedor: [], productos: [] });
         return;
@@ -278,4 +279,65 @@ exports.searchProductoProveedor = async(req, res) => {
     }
 
     res.status(201).send({ proveedores: resultadoProveedores, productos: arrayProductos });
+}
+
+exports.searchOnlyProductos = async(req, res) => {
+    const { busqueda } = req.body;
+    let arrayProductos = [];
+    let resultadoProductos;
+
+    if (busqueda == '')
+        resultadoProductos = await model.find({ tipo: busqueda });
+    else
+        resultadoProductos = await model.find({ 'productos.tipo': busqueda });
+
+    if (resultadoProductos.length > 0) {
+
+        resultadoProductos.filter(p => p.productos.tipo == busqueda);
+
+        resultadoProductos.forEach(proveedor => {
+
+            //Devolvemos solo los productos que corresponden al valor de la variable busqueda
+            proveedor.productos.forEach(producto => {
+
+                const nombreTipo = String(producto.tipo).toLowerCase();
+                const busquedaSet = String(busqueda).toLowerCase();
+
+                if (nombreTipo.includes(busquedaSet)) {
+                    producto.idProveedor = proveedor._id;
+                    arrayProductos = [...arrayProductos, producto]
+                }
+            });
+        });
+
+    }
+
+    res.status(201).send(arrayProductos);
+}
+
+exports.searchProductoId = async(req, res) => {
+    const { id } = req.body;
+    let arrayProductos = [];
+
+    const resultadoProductos = await model.find({ 'productos._id': id });
+
+    if (resultadoProductos.length > 0) {
+
+        resultadoProductos.filter(p => p.productos._id == id);
+
+        resultadoProductos.forEach(proveedor => {
+
+            //Devolvemos solo los productos que corresponden al valor de la variable busqueda
+            proveedor.productos.forEach(producto => {
+
+                if (producto._id == id) {
+                    producto.idProveedor = proveedor._id;
+                    arrayProductos = producto;
+                }
+            });
+        });
+
+    }
+
+    res.status(201).send(arrayProductos);
 }

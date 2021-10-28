@@ -31,17 +31,28 @@ exports.getData = async(req, res) => {
     }).clone().catch(function(err) { console.log(err) });
 }
 
+exports.getDataSingle = async(req, res) => {
+    const { id } = req.params;
+
+    const cliente = await model.findById({ _id: id });
+
+    if (cliente)
+        res.send(cliente).status(201);
+    else
+        res.send({ error: 'no encontrado' }).status(404);
+}
+
 exports.insert = async(req, res) => {
     const data = req.body;
 
     const emailExistente = await generalFunctions.emailExistente(data);
 
     if (!emailExistente) {
-        res.send({ error: 'email existente' });
+        res.send({ error: 'email existente' }).status(404);
         return;
     }
 
-    data.img = pathImg;
+    //data.img = pathImg;
 
     await model.create(data, (err, data) => {
         if (err)
@@ -59,7 +70,7 @@ exports.deleteSingle = async(req, res) => {
     const cliente = await model.findById({ _id: id });
 
     //Eliminamos la imagen
-    if (cliente)
+    if (cliente && cliente.img != '')
         await fs.unlink(`./${cliente.img}`);
 
     await model.deleteOne({ _id: parseId(id) },
@@ -76,8 +87,8 @@ exports.updateSingle = async(req, res) => {
     const body = req.body;
 
     const emailExistente = await generalFunctions.emailExistente(body);
-
-    if (!emailExistente) {
+    usuarioEncontrado = await model.findOne({ email: body.email });
+    if (!emailExistente && usuarioEncontrado.email != body.email) {
         res.send({ error: 'email existente' });
         return;
     }

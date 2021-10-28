@@ -5,8 +5,9 @@ const path = '/cliente';
 const controller = require('../controllers/cliente');
 
 router.get(`${path}`, controller.getData);
+router.get(`${path}/:id`, controller.getDataSingle);
 
-router.post(`${path}`, controller.upload, controller.insert);
+router.post(`${path}`, /*controller.upload,*/ controller.insert);
 
 router.delete(`${path}/:id`, controller.deleteSingle);
 

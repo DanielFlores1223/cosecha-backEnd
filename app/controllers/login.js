@@ -19,15 +19,15 @@ exports.login = async(req, res) => {
             usuarioEncontrado = await administrador.findOne({ '$and': [{ email }, { password }] });
 
             if (usuarioEncontrado)
-                res.send({ user: usuarioEncontrado, typeUser: 'administrador' });
+                res.send({ user: usuarioEncontrado, typeUser: 'administrador', login: true });
             else
-                res.send({ response: 'empty' });
+                res.send({ login: false });
 
         } else
-            res.send({ user: usuarioEncontrado, typeUser: 'proveedor' });
+            res.send({ user: usuarioEncontrado, typeUser: 'proveedor', login: true });
 
     } else
-        res.send({ user: usuarioEncontrado, typeUser: 'cliente' });
+        res.send({ user: usuarioEncontrado, typeUser: 'cliente', login: true });
 
 
 }
