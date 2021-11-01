@@ -195,7 +195,7 @@ exports.deleteProducto = async(req, res) => {
 }
 
 async function queryUpdate(idProv, idProd, body) {
-    const { nombreProducto, precio, tipo, descuento, stock } = body;
+    const { nombreProducto, precio, tipo, descuento, stock, descripcion } = body;
 
     const modelMod = await model.findOneAndUpdate({ '$and': [{ '_id': parseId(idProv) }, { 'productos._id': parseId(idProd) }] }, {
         $set: {
@@ -204,6 +204,7 @@ async function queryUpdate(idProv, idProd, body) {
             'productos.$.tipo': tipo,
             'productos.$.descuento': descuento,
             'productos.$.stock': stock,
+            'productos.$.descripcios': descripcion
         }
     }, {
         new: true
