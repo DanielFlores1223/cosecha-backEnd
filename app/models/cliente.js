@@ -41,6 +41,9 @@ const clienteSchema = moongose.Schema({
         precioProducto: {
             type: Number
         },
+        imgProducto: {
+            type: String
+        },
         total: {
             type: Number
         },
@@ -56,7 +59,8 @@ const clienteSchema = moongose.Schema({
             default: ''
         },
         estrellas: {
-            type: Number
+            type: Number,
+            default: 0
         }
     }],
     versionKey: false,
