@@ -204,7 +204,7 @@ async function queryUpdate(idProv, idProd, body) {
             'productos.$.tipo': tipo,
             'productos.$.descuento': descuento,
             'productos.$.stock': stock,
-            'productos.$.descripcios': descripcion
+            'productos.$.descripcion': descripcion
         }
     }, {
         new: true
@@ -258,6 +258,8 @@ exports.searchProductoProveedor = async(req, res) => {
 
     const resultadoProductos = await model.find({ 'productos.nombreProducto': { '$regex': busqueda, '$options': 'i' } });
 
+    const resProvProd = await model.find({ 'productos.nombreProducto': { '$regex': busqueda, '$options': 'i' } });
+
     if (resultadoProductos.length > 0) {
 
         resultadoProductos.filter(p => p.productos.nombreProducto == busqueda);
@@ -272,6 +274,7 @@ exports.searchProductoProveedor = async(req, res) => {
 
                 if (nombreProducto.includes(busquedaSet)) {
                     producto.idProveedor = proveedor._id;
+                    producto.nombreEmpresaProd = proveedor.nombreEmpresa;
                     arrayProductos = [...arrayProductos, producto]
                 }
             });
@@ -279,7 +282,7 @@ exports.searchProductoProveedor = async(req, res) => {
 
     }
 
-    res.status(201).send({ proveedores: resultadoProveedores, productos: arrayProductos });
+    res.status(201).send({ proveedores: resultadoProveedores, productos: arrayProductos, provProd: resProvProd });
 }
 
 exports.searchOnlyProductos = async(req, res) => {
@@ -306,6 +309,7 @@ exports.searchOnlyProductos = async(req, res) => {
 
                 if (nombreTipo.includes(busquedaSet)) {
                     producto.idProveedor = proveedor._id;
+                    producto.nombreEmpresaProd = proveedor.nombreEmpresa;
                     arrayProductos = [...arrayProductos, producto]
                 }
             });

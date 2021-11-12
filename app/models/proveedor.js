@@ -69,6 +69,9 @@ const proveedorSchema = moongose.Schema({
         },
         descripcion: {
             type: String
+        },
+        nombreEmpresaProd: {
+            type: String
         }
     }],
     versionKey: false,
